@@ -2,23 +2,19 @@ import argparse
 import json
 from typing import Tuple, List
 
-import cv2
-import editdistance
-from path import Path
+import cv2 # type: ignore
+import editdistance # type: ignore
+from path import Path # type: ignore
 
 from dataloader_iam import DataLoaderIAM, Batch
 from model import Model, DecoderType
 from preprocessor import Preprocessor
 
 
-# class FilePaths:
-#     """Filenames and paths to data."""
-#     fn_char_list = '../model/charList.txt'
-#     fn_summary = '../model/summary.json'
-#     fn_corpus = '../data/corpus.txt'
+
 class FilePaths:
     """Filenames and paths to data."""
-    fn_char_list = 'C:\\Users\\anshad c v\\Desktop\\anshad\\SimpleHTR\\model\\charList.txt'
+    fn_char_list = r'C:\Users\nehav\Desktop\mini_project-master\mini_project-master\model\charList.txt'
     fn_summary = '../model/summary.json'
     fn_corpus = '../data/corpus.txt'
 
@@ -137,7 +133,7 @@ def validate(model: Model, loader: DataLoaderIAM, line_mode: bool) -> Tuple[floa
     print(f'Character error rate: {char_error_rate * 100.0}%. Word accuracy: {word_accuracy * 100.0}%.')
     return char_error_rate, word_accuracy
 
-
+    
 def infer(model: Model, fn_img: Path) -> None:
     """Recognizes text in image provided by file path."""
     img = cv2.imread(fn_img, cv2.IMREAD_GRAYSCALE)
@@ -150,7 +146,8 @@ def infer(model: Model, fn_img: Path) -> None:
     recognized, probability = model.infer_batch(batch, True)
     print(f'Recognized: "{recognized[0]}"')
     print(f'Probability: {probability[0]}')
-    return recognized[0]
+
+    return recognized
 
 
 def parse_args() -> argparse.Namespace:
@@ -168,11 +165,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--dump', help='Dump output of NN to CSV file(s).', action='store_true')
 
     return parser.parse_args()
- 
-def main():    
+
+
+def main():
     """Main function."""
 
-    # parse arguments and set CTC decoder    
+    # parse arguments and set CTC decoder
     args = parse_args()
     decoder_mapping = {'bestpath': DecoderType.BestPath,
                        'beamsearch': DecoderType.BeamSearch,
@@ -181,14 +179,13 @@ def main():
 
     # train the model
     if args.mode == 'train':
-        print('1')
         loader = DataLoaderIAM(args.data_dir, args.batch_size, fast=args.fast)
 
         # when in line mode, take care to have a whitespace in the char list
         char_list = loader.char_list
         if args.line_mode and ' ' not in char_list:
             char_list = [' '] + char_list
- 
+
         # save characters and words
         with open(FilePaths.fn_char_list, 'w') as f:
             f.write(''.join(char_list))
@@ -201,18 +198,15 @@ def main():
 
     # evaluate it on the validation set
     elif args.mode == 'validate':
-        print('4')
         loader = DataLoaderIAM(args.data_dir, args.batch_size, fast=args.fast)
         model = Model(char_list_from_file(), decoder_type, must_restore=True)
         validate(model, loader, args.line_mode)
 
     # infer text on test image
     elif args.mode == 'infer':
-        print('3')
         model = Model(char_list_from_file(), decoder_type, must_restore=True, dump=args.dump)
         infer(model, args.img_file)
-        
 
 
-    if __name__ == '__main__':
-            main()
+if __name__ == '__main__':
+    main()

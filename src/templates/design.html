@@ -15,33 +15,33 @@
             <p style="text-align: center;">
                <strong>HANDWRITTEN TEXT RECOGNITION</strong> 
             </p>
-            <script>
-                src="{{ url_for('static',filename='script.js') }}"
-                function speak() {
-                    var text = document.getElementById("text").value;
-                    var speech = new SpeechSynthesisUtterance();
-                    speech.text = text;
-                    window.speechSynthesis.speak(speech);
-                }
-            </script>
+
         </header>
         <div class="container">
-            <img class="pict" src="{{ url_for('static',filename='handwritten.jpg') }}">       
+            <img class="pict" src="{{ url_for('static',filename='handwritten.jpg') }}">  
+            
+            <img id="output-image" class="output-image" /><br>
         
-            <p class="text">The text is: <textarea id="text">{{res}}</textarea></p>  
-            <button onclick="speak()">convert to speech</button>         
+            <div class="cont">   
+                <form action='/submit_image' method='POST' enctype="multipart/form-data">
+                    <input class="choose" type='file' name='image' id="inputfile" onchange="preview_image(event)"/>
+                    <input class="sub" type='submit'/>
+                </form>
+            </div>
         </div>
        
-        <img class="pic" src="{{url_for('static', filename=image_path)}}" />
-        
-        <div class="cont">   
-            <form action='/submit_image' method='POST' enctype="multipart/form-data">
-                <input class="choose" type='file' name='image' />
-                <input class="sub" type='submit'/>
-            </form>
-        </div>
-        
 
+        
+        <script type="text/javascript">
+            function preview_image(event) {
+              var reader = new FileReader();
+              reader.onload = function () {
+                var output = document.getElementById('output-image')
+                output.src = reader.result;
+              }
+              reader.readAsDataURL(event.target.files[0]);
+            }
+          </script>
         
     </body>
 </html>
